@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HiveForum · DAO Voting Criteria Builder</title>
+<style>
+  :root{
+    --hive-red:#E31337;
+    --hive-red-2:#f63a55;
+    --ink:#111318;
+    --muted:#667085;
+    --bg:#f7f8fb;
+    --card:#ffffff;
+    --ok:#0f8b4c;
+    --warn:#c23b22;
+    --border:#E5E7EB;
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:linear-gradient(180deg,#fafbfd 0%,#fff 100%);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif}
+  a{color:var(--hive-red);text-decoration:none}
+  .topbar{
+    position:sticky;top:0;z-index:10;
+    background:linear-gradient(90deg,var(--hive-red),var(--hive-red-2));
+    color:#fff;padding:14px 0;border-bottom:1px solid rgba(0,0,0,.06);
+    box-shadow:0 6px 16px rgba(227,19,55,.18);
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 18px}
+  .brand{display:flex;gap:10px;align-items:center}
+  .logo{
+    width:30px;height:30px;border-radius:8px;background:#fff;display:grid;place-items:center;
+    box-shadow:0 2px 6px rgba(0,0,0,.15)
+  }
+  .logo::after{
+    content:"H"; font-weight:900; color:var(--hive-red);
+  }
+  h1{margin:0;font-size:18px;font-weight:800;letter-spacing:.2px}
+  .sub{opacity:.9;font-size:12.5px}
+
+  .hero{padding:18px 0 10px}
+  .grid{display:grid;grid-template-columns:1fr;gap:14px}
+  @media(min-width:900px){.grid{grid-template-columns:2fr 1fr}}
+
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:0 2px 10px rgba(17,19,24,.05);padding:16px
+  }
+  .card h2{margin:0 0 8px;font-size:25px;letter-spacing:.2px}
+  .meta{color:var(--muted);font-size:12.5px;margin-bottom:8px}
+
+  .market{
+    display:flex;flex-wrap:wrap;gap:10px;align-items:center
+  }
+  .badge{padding:6px 10px;border-radius:999px;font-size:12.5px;border:1px solid var(--border);background:#fff}
+  .pill{padding:6px 10px;border-radius:999px;font-size:12.5px;color:#fff;background:var(--hive-red)}
+  .status{font-weight:700}
+  .status.ok{color:var(--ok)}
+  .status.warn{color:var(--warn)}
+
+  .section{
+    margin-top:30px;
+    margin-bottom:30px;
+    padding-top:0;
+    border-top:none;
+  }
+  h2.section {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 20px;
+  }
+  .row{
+    display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;
+    padding:12px 14px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:#fff;
+    margin-bottom:14px;
+  }
+  .row + .row{margin-top:10px}
+  .row input[type="checkbox"]{margin-top:3px}
+  label{font-weight:600}
+  .hint{color:var(--muted);font-size:12.5px;margin-top:3px}
+  .inputs{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:10px;
+    margin-bottom:14px;
+  }
+  .inputs.single{
+    grid-template-columns:1fr;
+    margin-top:20px;
+    margin-bottom:28px;
+  }
+  .inputs.three{
+    grid-template-columns:1fr 1fr 1fr;
+    margin-top:20px;
+    margin-bottom:28px;
+  }
+  input[type="text"],input[type="number"],input[type="url"],input[type="search"],select{
+    width:100%;
+    padding:10px 12px;
+    height:42px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:#fff;
+    outline:none;
+    transition:border .15s ease;
+    font:inherit;
+    box-sizing:border-box;
+    vertical-align:middle;
+  }
+  textarea {
+    display: block;
+    width: 100%;
+    min-height: 120px;
+    height: auto;
+    resize: vertical;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    outline: none;
+    font: inherit;
+    box-sizing: border-box;
+  }
+  input:focus,textarea:focus,select:focus{border-color:#c9cdd4;box-shadow:0 0 0 3px rgba(227,19,55,.08)}
+
+  .tooltip{
+    display:inline-grid;place-items:center;width:18px;height:18px;border:1px solid var(--border);border-radius:50%;
+    color:#555; font-size:12px; margin-left:6px; position:relative; cursor:help; background:#fff
+  }
+  .tooltip::before{content:"i";font-weight:700}
+  .tooltip[data-tip]:hover::after{
+    content:attr(data-tip); position:absolute; left:50%; transform:translateX(-50%); bottom:130%;
+    background:#111;color:#fff; padding:8px 10px; border-radius:8px; font-size:12.5px; line-height:1.35; white-space:normal; width:280px;
+    box-shadow:0 6px 24px rgba(0,0,0,.25)
+  }
+  .tooltip[data-tip]:hover::before{
+    content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:120%;
+    border:8px solid transparent; border-top-color:#111;
+  }
+
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .btn{
+    background:linear-gradient(90deg,var(--hive-red),var(--hive-red-2));color:#fff;border:0;border-radius:999px;
+    padding:10px 14px;font-weight:800;letter-spacing:.2px;cursor:pointer;box-shadow:0 6px 18px rgba(227,19,55,.25)
+  }
+  .btn.sec{background:#fff;color:var(--hive-red);border:1px solid var(--hive-red);box-shadow:none}
+  .out{white-space:pre-wrap;background:#0f1115;color:#e6e6e6;border-radius:12px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px}
+
+  .hdrstrip{
+    background:var(--hive-red); color:#fff; padding:10px 12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)
+  }
+  .hdrstrip .title{font-weight:800;letter-spacing:.2px}
+  .hdrstrip small{opacity:.9}
+  .kpi-tag{display:inline-block;background:#f0f4ff;border:1px solid #dfe6ff;color:#27325a;font-size:12px;border-radius:999px;padding:4px 8px;margin-right:6px}
+  .danger{color:var(--warn);font-weight:700}
+  .success{color:var(--ok);font-weight:700}
+  .note{font-size:12.5px;color:var(--muted)}
+  footer{padding:22px 0 30px;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="wrap brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>HiveForum — DAO Voting Criteria Builder</h1>
+        <div class="sub">Compose & publish your personal DHF voting framework. Open, predictable, far from centralism.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap hero">
+    <div class="grid">
+      <!-- LEFT: Form -->
+      <div class="card" style="margin-bottom:18px;">
+        <div class="hdrstrip">
+          <div class="title">Your Voting Profile</div>
+          <small>Tip: keep it concise and link to a longer rationale post.</small>
+        </div>
+        <div class="section">
+          <div class="inputs">
+            <div>
+              <label>Display name</label>
+              <input id="name" type="text" placeholder="@YourWitness / Stakeholder" value="@roelandp" />
+            </div>
+            <div>
+              <label>Reference URL (long-form)</label>
+              <input id="refurl" type="url" placeholder="https://peakd.com/@you/voting-criteria" />
+            </div>
+          </div>
+        </div>
+
+        <h2 class="section">Market-Conditional Policy
+          <span class="tooltip" data-tip="Rules that only apply when HIVE market cap is below a threshold. Defaults to $70M and auto-evaluates with live data."></span>
+        </h2>
+        <div class="inputs three">
+          <div>
+            <label>Market cap threshold (USD)</label>
+            <input id="capThreshold" type="number" min="0" step="100000" value="70000000" />
+          </div>
+          <div>
+            <label>Max % of DHF balance per quarter</label>
+            <input id="quarterCapPct" type="number" min="0" max="100" step="0.1" value="2.0" />
+            <div class="hint" id="quarterCapCalc">≈ $—</div>
+          </div>
+          <div>
+            <label>Exceptions (comma-sep)</label>
+            <input id="exceptions" type="text" value="Keychain, VSC" />
+          </div>
+        </div>
+        <div class="row" title="If HIVE market cap is under your threshold, this block becomes active.">
+          <input id="chkMC" type="checkbox" />
+          <div>
+            <label for="chkMC">Enable “If Market Cap &lt; Threshold” block</label>
+            <div class="hint">Auto-suggested on live data. Prevents proposals &gt; per-quarter cap; exceptions listed above.</div>
+          </div>
+        </div>
+
+        <h2 class="section">Proposal Term & Review Window
+          <span class="tooltip" data-tip="Shorter terms improve accountability. A review window allows community input before votes."></span>
+        </h2>
+        <div class="row">
+          <input id="chkQuarterly" type="checkbox" checked />
+          <div>
+            <label for="chkQuarterly">Max proposal term: <strong>Quarterly (3 months)</strong></label>
+            <div class="hint">Annual proposals not supported; renew per quarter with report.</div>
+          </div>
+        </div>
+        <div class="inputs three">
+          <div>
+            <label>Minimum days between submission & voting</label>
+            <input id="reviewDays" type="number" min="0" step="1" value="14" />
+          </div>
+          <div>
+            <label>Staged payouts (milestones)</label>
+            <select id="staged"><option value="Yes" selected>Yes</option><option>No</option></select>
+          </div>
+          <div>
+            <label>Escrow / multisig releases</label>
+            <select id="escrow"><option value="Preferred" selected>Preferred</option><option>Optional</option></select>
+          </div>
+        </div>
+
+        <h2 class="section">Reporting & KPIs
+          <span class="tooltip" data-tip="Quarterly report required, with KPI targets & actuals. Missing a report = no extension next quarter."></span>
+        </h2>
+        <div class="row">
+          <input id="chkReport" type="checkbox" checked />
+          <div>
+            <label for="chkReport">Quarterly report with clear KPIs</label>
+            <div class="hint">Include targets & achievements; publish on-chain.</div>
+          </div>
+        </div>
+        <div class="inputs single">
+          <div>
+            <label>Example KPI targets</label>
+            <textarea id="kpis">• +10% QoQ active users (unique sign-ins)\n• 5 dApp integrations; 2 production launches\n• 2,000 net new wallets; 500 retained after 30 days\n• Marketing ROI ≥ 1.2x; CAC ≤ $8</textarea>
+          </div>
+        </div>
+        <div class="inputs single">
+          <div>
+            <label>Non-compliance rule</label>
+            <textarea id="noncomp">If the quarterly report is not published within 10 days of term end, no funding extension the following quarter.</textarea>
+          </div>
+        </div>
+
+        <h2 class="section">Return-of-Value to DHF
+          <span class="tooltip" data-tip="Describe how value flows back (revenue share, fee burn, buybacks, or partner contributions)."></span>
+        </h2>
+        <div class="row">
+          <input id="chkReturn" type="checkbox" checked />
+          <div>
+            <label for="chkReturn">Require return-of-value section in proposals</label>
+            <div class="hint">Prefer explicit % back to DHF or measurable economic sink.</div>
+          </div>
+        </div>
+        <div class="inputs single">
+          <div>
+            <label>Return-of-value statement</label>
+            <textarea id="rov">Project commits to share ≥10% of net profits with the DHF (quarterly), or equivalent buyback/burn mechanics documented in the proposal.</textarea>
+          </div>
+        </div>
+
+        <h2 class="section">Accounting (GAAP / Double-Entry)
+          <span class="tooltip" data-tip="Baseline professionalism: double-entry bookkeeping, receipts, and periodic financials."></span>
+        </h2>
+        <div class="row">
+          <input id="chkGAAP" type="checkbox" />
+          <div>
+            <label for="chkGAAP">Require GAAP-style double-entry bookkeeping</label>
+            <div class="hint">Projects publish ledger extracts (CSV/JSON), receipts, and reconciled statements.</div>
+          </div>
+        </div>
+        <div class="inputs three">
+          <div>
+            <label>Financial cadence</label>
+            <select id="finCadence">
+              <option>Monthly</option><option selected>Quarterly</option>
+            </select>
+          </div>
+          <div>
+            <label>Public ledger export</label>
+            <select id="ledger"><option selected>Required</option><option>Optional</option></select>
+          </div>
+          <div>
+            <label>Receipt evidence</label>
+            <select id="receipts"><option selected>Required</option><option>Optional</option></select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="gen">Generate Markdown</button>
+          <button class="btn sec" id="copy">Copy Output</button>
+        </div>
+
+        <div class="section">
+          <label>Output</label>
+          <pre id="out" class="out" aria-live="polite"></pre>
+        </div>
+      </div>
+
+      <!-- RIGHT: Live Market Panel -->
+      <div class="card" style="margin-bottom:18px; padding:18px 18px 18px 18px; border-radius:12px;">
+        <h2 style="display:flex;align-items:center;gap:8px;">Live HIVE Market
+          <span class="tooltip" data-tip="Data from CoinGecko (refreshed every 5 minutes)."></span>
+        </h2>
+        <div id="marketPanel" class="market">
+          <span class="badge">Fetching…</span>
+        </div>
+        <div class="section">
+          <div id="capStatus" class="hint">Waiting for data…</div>
+        </div>
+
+        <!-- Helpful presets block removed -->
+
+        <h2 class="section">Notes</h2>
+        <div class="note" style="padding:8px 0;">
+          • You can publish the generated Markdown under your account (PeakD / Ecency / Hive.blog).<br/>
+          • Consider linking to a longer rationale and updating quarterly.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Built with ❤️ for the Hive community — HiveForum
+  </footer>
+
+<script>
+(async function(){
+  const $ = sel => document.querySelector(sel);
+
+  // Replace literal "\n" with actual line breaks for textarea defaults
+  document.querySelectorAll('textarea').forEach(el => {
+    el.value = el.value.replace(/\\n/g, '\n');
+  });
+
+  // Elements
+  const panel = $('#marketPanel');
+  const capStatus = $('#capStatus');
+  const chkMC = $('#chkMC');
+
+  // Live data fetch (CoinGecko)
+  const API = "https://api.coingecko.com/api/v3/coins/hive?x_cg_demo_api_key=CG-U4WAq6KRZomzpA3z9ReuYCSv&tickers=true&market_data=true";
+
+  let market = { price: null, cap: null, chg24: null, last: null };
+
+  async function loadMarket(){
+    try{
+      panel.innerHTML = '<span class="badge">Loading live data…</span>';
+      const res = await fetch(API, {cache:'no-store'});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const j = await res.json();
+      const md = j.market_data || {};
+      market.price = md.current_price?.usd ?? null;
+      market.cap   = j.market_cap?.usd ?? md.market_cap?.usd ?? j.market_cap_usd ?? null;
+      // The blob you pasted includes market_cap at j.market_cap.usd and also MD; try multiple paths:
+      if(!market.cap && md.market_cap && typeof md.market_cap.usd === 'number') market.cap = md.market_cap.usd;
+      if(!market.cap && j.market_cap && typeof j.market_cap.usd === 'number') market.cap = j.market_cap.usd;
+      market.chg24 = md.price_change_percentage_24h ?? null;
+      market.last  = j.last_updated || md.last_updated || new Date().toISOString();
+
+      const nice = (n, d=2) => (n==null?'—':Number(n).toLocaleString(undefined,{maximumFractionDigits:d}));
+      const badge = (txt)=> `<span class="badge">${txt}</span>`;
+      const pct = (p)=> p==null?'—':(p>=0?`<span class="status ok">+${p.toFixed(2)}%</span>`:`<span class="status warn">${p.toFixed(2)}%</span>`);
+
+      panel.innerHTML = [
+        badge(`Price: $${nice(market.price,4)}`),
+        badge(`Market Cap: $${nice(market.cap,0)}`),
+        badge(`24h: ${pct(market.chg24)}`),
+        badge(`Updated: ${new Date(market.last).toLocaleTimeString()}`)
+      ].join(' ');
+
+      evaluateCap();
+    }catch(e){
+      panel.innerHTML = `<span class="badge">Failed to load market data</span>`;
+      capStatus.textContent = 'Could not fetch live data. You can still set rules manually.';
+      console.error(e);
+    }
+  }
+
+  function evaluateCap(){
+    const thr = Number($('#capThreshold').value || 0);
+    const cap = Number(market.cap || 0);
+    if(!cap || !thr){
+      capStatus.innerHTML = 'Set a threshold to get automatic recommendations.';
+      return;
+    }
+    if(cap < thr){
+      capStatus.innerHTML = `Market cap < threshold → <span class="danger">DHF payout cap automatically reduced.</span>`;
+      chkMC.checked = true;
+    }else{
+      capStatus.innerHTML = `Market cap ≥ threshold → <span class="success">Standard rules apply</span>.`;
+    }
+  }
+
+  // Preset strict block removed
+
+  // Generate Markdown
+  $('#gen').addEventListener('click', ()=>{
+    const name = $('#name').value.trim() || '(your handle)';
+    const ref  = $('#refurl').value.trim();
+    const thr  = Number($('#capThreshold').value||0);
+    const qcapPct = Number($('#quarterCapPct').value||0);
+    const exc  = $('#exceptions').value.trim();
+    const quarterly = $('#chkQuarterly').checked;
+    const rdays = Number($('#reviewDays').value||0);
+    const staged = $('#staged').value;
+    const escrow = $('#escrow').value;
+    const rep = $('#chkReport').checked;
+    const kpis = $('#kpis').value.trim();
+    const nonc = $('#noncomp').value.trim();
+    const rovReq = $('#chkReturn').checked;
+    const rovTxt = $('#rov').value.trim();
+    const gaap = $('#chkGAAP').checked;
+    const finCadence = $('#finCadence').value;
+    const ledger = $('#ledger').value;
+    const receipts = $('#receipts').value;
+    const mcActive = $('#chkMC').checked;
+
+    const nice = (n)=> n? n.toLocaleString(undefined): '—';
+    const capNow = (market.cap? `$${Number(market.cap).toLocaleString(undefined)}` : 'n/a');
+
+    // Calculate USD value for max % per quarter
+    let qcapUSD = null;
+    if (market.cap && qcapPct) {
+      qcapUSD = Math.round((market.cap * qcapPct) / 100);
+    }
+
+    let md = [];
+    md.push(`# Hive DAO Voting Criteria — ${name}`);
+    if(ref) md.push(`Reference: ${ref}`);
+    md.push('');
+    md.push(`> Generated via **HiveForum DAO Voting Criteria Builder** · Live Market Cap: **${capNow}** · Threshold: **$${nice(thr)}**`);
+    md.push('');
+
+    // Market-conditional block
+    if(mcActive){
+      md.push(`## Market-Conditional Rules (apply if Market Cap < $${nice(thr)})`);
+      md.push(`- No DHF proposals above **${qcapPct}% of DHF balance per quarter**${qcapUSD ? ` (≈ $${nice(qcapUSD)})` : ''} (exceptions: ${exc||'—'}).`);
+      md.push(`- Max proposal term is **Quarterly**; no annual terms.`);
+      md.push('');
+    }
+
+    md.push(`## Proposal Term & Review Window`);
+    if(quarterly) md.push(`- Max proposal term: **Quarterly (3 months)**.`);
+    md.push(`- Minimum **${rdays} days** between proposal submission and voting for community review.`);
+    md.push(`- **Staged payouts**: ${staged}.`);
+    md.push(`- **Escrow / multisig releases**: ${escrow}.`);
+    md.push('');
+
+    md.push(`## Reporting & KPIs`);
+    if(rep) md.push(`- **Quarterly report required** with clear KPI targets and achievements (publish on-chain).`);
+    if(kpis) md.push(`- Example KPIs:\n${kpis.split('\n').map(l=>`  ${l.trim()?'• '+l.trim():''}`).join('\n')}`);
+    if(nonc) md.push(`- Non-compliance: ${nonc}`);
+    md.push('');
+
+    md.push(`## Return-of-Value to DHF`);
+    if(rovReq) md.push(`- Proposals must include a **Return-of-Value** section.`);
+    if(rovTxt) md.push(`- Stated mechanism: ${rovTxt}`);
+    md.push('');
+
+    md.push(`## Accounting (GAAP / Double-Entry)`);
+    if(gaap){
+      md.push(`- Require **double-entry bookkeeping** (GAAP-style).`);
+      md.push(`- Financial cadence: **${finCadence}**.`);
+      md.push(`- Public ledger export: **${ledger}**.`);
+      md.push(`- Receipt evidence: **${receipts}**.`);
+    }else{
+      md.push(`- GAAP and double-entry bookkeeping: **Recommended** (not strictly required in this policy).`);
+    }
+
+    $('#out').textContent = md.join('\n');
+    // Scroll to output on mobile
+    $('#out').scrollIntoView({behavior:'smooth',block:'center'});
+  });
+
+  $('#copy').addEventListener('click', async ()=>{
+    const text = $('#out').textContent;
+    if(!text.trim()){ alert('Generate the Markdown first.'); return; }
+    try{
+      await navigator.clipboard.writeText(text);
+      alert('Copied to clipboard!');
+    }catch{
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      alert('Copied to clipboard!');
+    }
+  });
+
+  // Re-evaluate when threshold or cap percent changes
+  $('#capThreshold').addEventListener('input', evaluateCap);
+  $('#quarterCapPct').addEventListener('input', updateQuarterCapCalc);
+
+  function updateQuarterCapCalc() {
+    const qcapPct = Number($('#quarterCapPct').value||0);
+    const cap = Number(market.cap || 0);
+    const el = document.getElementById('quarterCapCalc');
+    if (cap && qcapPct) {
+      const usd = Math.round((cap * qcapPct) / 100);
+      el.textContent = `≈ $${usd.toLocaleString()}`;
+    } else {
+      el.textContent = '≈ $—';
+    }
+  }
+
+  // Kickoff
+  await loadMarket();
+  updateQuarterCapCalc();
+  // Refresh every 5 min
+  setInterval(async () => {
+    await loadMarket();
+    updateQuarterCapCalc();
+  }, 5*60*1000);
+})();
+</script>
+</body>
+</html>
