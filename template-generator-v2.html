@@ -1,0 +1,913 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HiveForum · DAO Voting Criteria Builder</title>
+<style>
+  :root{
+    --hive-red:#E31337;
+    --hive-red-2:#f63a55;
+    --ink:#111318;
+    --muted:#667085;
+    --bg:#f7f8fb;
+    --card:#ffffff;
+    --ok:#0f8b4c;
+    --warn:#c23b22;
+    --border:#E5E7EB;
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:linear-gradient(180deg,#fafbfd 0%,#fff 100%);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif}
+
+  body {
+  counter-reset: section; /* start the counter */
+}
+
+  a{color:var(--hive-red);text-decoration:none}
+  .topbar{
+    position:sticky;top:0;z-index:10;
+    background:linear-gradient(90deg,var(--hive-red),var(--hive-red-2));
+    color:#fff;padding:14px 0;border-bottom:1px solid rgba(0,0,0,.06);
+    box-shadow:0 6px 16px rgba(227,19,55,.18);
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 18px}
+  .brand{display:flex;gap:10px;align-items:center}
+  .logo{
+    width:30px;height:30px;border-radius:8px;background:#fff;display:grid;place-items:center;
+    box-shadow:0 2px 6px rgba(0,0,0,.15)
+  }
+  .logo::after{
+    content:"H"; font-weight:900; color:var(--hive-red);
+  }
+  h1{margin:0;font-size:18px;font-weight:800;letter-spacing:.2px}
+  .sub{opacity:.9;font-size:12.5px}
+
+  .hero{padding:18px 0 10px}
+  .grid{display:grid;grid-template-columns:1fr;gap:14px}
+  @media(min-width:900px){.grid{grid-template-columns:2fr 1fr}}
+
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:0 2px 10px rgba(17,19,24,.05);padding:16px
+  }
+  .card h2{margin:0 0 8px;font-size:25px;letter-spacing:.2px}
+  .meta{color:var(--muted);font-size:12.5px;margin-bottom:8px}
+
+  .market{
+    display:flex;flex-wrap:wrap;gap:10px;align-items:center
+  }
+  .badge{padding:6px 10px;border-radius:999px;font-size:12.5px;border:1px solid var(--border);background:#fff}
+  .pill{padding:6px 10px;border-radius:999px;font-size:12.5px;color:#fff;background:var(--hive-red)}
+  .status{font-weight:700}
+  .status.ok{color:var(--ok)}
+  .status.warn{color:var(--warn)}
+
+  .section{
+    margin-top:30px;
+    margin-bottom:30px;
+    padding-top:0;
+    border-top:none;
+  }
+  h2.section {
+    margin-top: 30px;
+  }
+
+  h2.section::before {
+    counter-increment: section;
+    content: counter(section);
+    background: var(--hive-red);
+    color: #fff;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 14px;
+    font-size: 14px;
+    box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--hive-red);
+    vertical-align: text-top;
+    transform: translateY(3px);
+  }
+  .row{
+    display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;
+    padding:12px 14px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:#fff;
+    margin-bottom:14px;
+  }
+  .row + .row{margin-top:10px}
+  .row input[type="checkbox"] {
+    margin-top: 0;
+    align-self: center;
+    transform: translateY(2px);
+  }
+  label{font-weight:600}
+  .hint{color:var(--muted);font-size:12.5px;margin-top:3px}
+  .section-hint {
+    font-size: 13.5px;
+    color: var(--muted);
+    margin-top: 2px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .inputs{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:10px;
+    margin-bottom:14px;
+  }
+  .inputs.single{
+    grid-template-columns:1fr;
+    margin-top:20px;
+    margin-bottom:28px;
+  }
+  .inputs.three {
+    display: table;
+    width: 100%;
+    border-spacing: 12px 0;
+    margin-top: 20px;
+    margin-bottom: 28px;
+  }
+
+  .inputs.three > div {
+    display: table-cell;
+    vertical-align: bottom;
+    width: 33%;
+  }
+
+  .inputs.three label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .inputs.three input,
+  .inputs.three select {
+    width: 100%;
+    height: 42px;
+    font-size: 15px;
+    line-height: 1.4;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    box-sizing: border-box;
+  }
+  input[type="text"],input[type="url"] {
+    width: 100%;
+    padding: 10px 12px;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    outline: none;
+    transition: border .15s ease;
+    font: inherit;
+    box-sizing: border-box;
+    vertical-align: middle;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-weight: normal;
+    letter-spacing: -0.3px;
+    color: var(--hive-red);
+  }
+  input[type="number"],input[type="search"],select{
+    width:100%;
+    padding:10px 12px;
+    height:42px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:#fff;
+    outline:none;
+    transition:border .15s ease;
+    font:inherit;
+    box-sizing:border-box;
+    vertical-align:middle;
+  }
+  textarea {
+    display: block;
+    width: 100%;
+    min-height: 120px;
+    height: auto;
+    resize: vertical;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    outline: none;
+    font: inherit;
+    box-sizing: border-box;
+  }
+
+  input, select, textarea {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-weight: normal;
+    color: #E31337;
+    letter-spacing: -0.3px;
+  }
+
+  input[type="number"] {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace !important;
+  font-weight: normal;
+  letter-spacing: -0.3px;
+  appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+  input:focus,textarea:focus,select:focus{border-color:#c9cdd4;box-shadow:0 0 0 3px rgba(227,19,55,.08)}
+
+  .inline-select {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .inline-select label {
+    flex: 0 0 auto;
+    margin: 0;
+  }
+
+  .inline-select select {
+    flex: 0 0 200px;
+    max-width: 200px;
+    height: 38px;
+    font-size: 14px;
+  }
+
+  
+
+  .tooltip{
+    display:inline-grid;place-items:center;width:18px;height:18px;border:1px solid var(--border);border-radius:50%;
+    color:#555; font-size:12px; margin-left:6px; position:relative; cursor:help; background:#fff
+  }
+  .tooltip::before{content:"i";font-weight:700}
+  .tooltip[data-tip]:hover::after{
+    content:attr(data-tip); position:absolute; left:50%; transform:translateX(-50%); bottom:130%;
+    background:#111;color:#fff; padding:8px 10px; border-radius:8px; font-size:12.5px; line-height:1.35; white-space:normal; width:280px;
+    box-shadow:0 6px 24px rgba(0,0,0,.25)
+  }
+  .tooltip[data-tip]:hover::before{
+    content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:120%;
+    border:8px solid transparent; border-top-color:#111;
+  }
+
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .btn{
+    background:linear-gradient(90deg,var(--hive-red),var(--hive-red-2));color:#fff;border:0;border-radius:999px;
+    padding:10px 14px;font-weight:800;letter-spacing:.2px;cursor:pointer;box-shadow:0 6px 18px rgba(227,19,55,.25);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .btn.sec {
+  background: #fff;
+  color: var(--hive-red);
+  border: 1px solid var(--hive-red);
+  box-shadow: none;
+  padding: 10px 14px;
+  line-height: 1;
+  border-radius: 999px;
+  letter-spacing: .2px;
+  cursor: pointer;
+}
+  .out{white-space:pre-wrap;background:#0f1115;color:#e6e6e6;border-radius:12px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px}
+
+  .hdrstrip{
+    background:var(--hive-red); color:#fff; padding:10px 12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)
+  }
+  .hdrstrip .title{font-weight:800;letter-spacing:.2px}
+  .hdrstrip small{opacity:.9}
+  .kpi-tag{display:inline-block;background:#f0f4ff;border:1px solid #dfe6ff;color:#27325a;font-size:12px;border-radius:999px;padding:4px 8px;margin-right:6px}
+  .danger{color:var(--warn);font-weight:700}
+  .success{color:var(--ok);font-weight:700}
+  .note{font-size:12.5px;color:var(--muted)}
+  footer{padding:22px 0 30px;color:var(--muted);text-align:center}
+
+  .spend-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+  .spend-row label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+
+  .spend-row label span.percent {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-weight: normal;
+    color: var(--hive-red);
+    letter-spacing: -0.3px;
+  }
+
+.spend-row input[type="number"] {
+  width: 70px;
+  margin-left: 4px;
+  text-align: right;
+}
+
+/* Custom checkbox styling */
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--hive-red);
+    cursor: pointer;
+    transform: scale(1);
+    border-radius: 10px;
+    padding-right: 20px;
+  }
+  input[type="checkbox"]:checked {
+    accent-color: var(--hive-red);
+  }
+  /* Custom selection colors for all text */
+  ::selection {
+    background: #333;
+    color: #fff;
+  }
+
+  /* WebKit-specific selection (for Safari, Chrome) */
+  ::-moz-selection {
+    background: #333;
+    color: #fff;
+  }
+
+  /* Custom selection color inside textareas */
+  textarea::selection {
+    background: var(--hive-red);
+    color: #fff;
+  }
+
+  textarea::-moz-selection {
+    background: var(--hive-red);
+    color: #fff;
+  }
+</style>
+  
+</head>
+<body>
+  <div class="topbar">
+    <div class="wrap brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>HiveForum — DAO Voting Criteria Generator</h1>
+        <div class="sub">Compose &amp; publish your personal DHF voting framework. Open, predictable, maintainable.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap hero">
+    <div class="grid">
+      <!-- LEFT: Form -->
+      <div class="card" style="margin-bottom:18px;">
+        <div class="">
+          <h2 class="title">Your Voting Profile</h2>
+          <small>Tip: keep it concise and link to a longer rationale post.</small>
+        </div>
+        <div class="section">
+          <div class="inputs">
+            <div>
+              <label>Display name</label>
+              <input id="name" type="text" placeholder="Hive Username" value="" />
+            </div>
+            <div>
+              <label>Reference URL (long-form)</label>
+              <input id="refurl" type="url" placeholder="https://hive.blog/@nedshair" />
+            </div>
+          </div>
+        </div>
+
+
+        <h2 class="section">DHF Spending Benchmarks</h2>
+        <div class="section-hint">Define responsible funding thresholds relative to Hive’s market cap.</div>
+        <div id="dhfPanel" style="padding:0 0 0 0;">
+          <div id="dhfSummary">Fetching DHF status...</div>
+          <div class="inputs single">
+            <label>Preferred DHF spending cap (% of market cap per quarter)</label>
+            <div class="spend-row">
+              <label><input type="radio" name="spendCap" value="0.5" checked> Normal <span class="percent">0.5%</span></label>
+              <label><input type="radio" name="spendCap" value="1.0"> Medium <span class="percent">1%</span></label>
+              <label><input type="radio" name="spendCap" value="1.5"> High <span class="percent">1.5%</span></label>
+              <label><input type="radio" name="spendCap" value="custom"> Custom: 
+                <input id="customCap" type="number" min="0" max="5" step="0.1" style="width:70px;">
+              </label>
+            </div>
+          </div>
+          <div id="dhfStatus" class="hint">Waiting for live data...</div>
+        </div>
+
+        <h2 class="section">Proposal Term & Review Window
+          <span class="tooltip" data-tip="Shorter terms improve accountability. A review window allows community input before votes."></span>
+        </h2>
+        <div class="section-hint">Encourage shorter proposal terms and allow time for community feedback.</div>
+        <div class="row">
+          <input id="chkQuarterly" type="checkbox" checked />
+          <div style="margin-left:10px;width:100%;">
+            <div class="inline-select">
+              <label for="chkQuarterly">Max proposal term</label>
+              <select id="proposalTerm">
+                <option selected>Quarterly (3 months)</option>
+                <option>Half-year (6 months)</option>
+                <option>Yearly (12 months)</option>
+              </select>
+            </div>
+            <div class="hint">Renew per term with report; shorter terms improve accountability.</div>
+          </div>
+        </div>
+        <div class="inputs three">
+          <div>
+            <label>Minimum days between submission & voting</label>
+            <input id="reviewDays" type="number" min="0" step="1" value="14" />
+          </div>
+          <div>
+            <label>Staged payouts (milestones)</label>
+            <select id="staged"><option value="Yes" selected>Yes</option><option>No</option></select>
+          </div>
+          <div>
+            <label>Escrow / multisig releases</label>
+            <select id="escrow"><option value="Preferred" selected>Preferred</option><option>Optional</option></select>
+          </div>
+        </div>
+
+        <h2 class="section">Reporting & KPIs
+          <span class="tooltip" data-tip="Quarterly report required, with KPI targets & actuals. Missing a report = no extension next quarter."></span>
+        </h2>
+        <div class="section-hint">Set measurable targets and require transparent progress reporting.</div>
+        <div class="row">
+          <input id="chkReport" type="checkbox" checked />
+          <div style="margin-left:10px;width:100%;">
+            <div class="inline-select">
+              <label for="chkReport">Reporting cadence</label>
+              <select id="reportCadence">
+                <option selected>Quarterly (3 months)</option>
+                <option>Half-year (6 months)</option>
+                <option>Yearly (12 months)</option>
+              </select>
+            </div>
+            <div class="hint">Include KPI targets & achievements; publish on-chain.</div>
+          </div>
+        </div>
+        <div class="row">
+          <input id="chkQuarterlyBeforeRenew" type="checkbox" checked />
+          <div style="margin-left:10px;width:100%;">
+            <label for="chkQuarterlyBeforeRenew">Reports must be issued before renewal consideration</label>
+          </div>
+        </div>
+        <div class="inputs single">
+          <div>
+            <label>Example KPI targets</label>
+<textarea id="kpis">• +10% QoQ active users (unique sign-ins)
+• 5 dApp integrations; 2 production launches
+• 2,000 net new wallets; 500 retained after 30 days
+• Marketing ROI ≥ 1.2x; CAC ≤ $8
+• Monthly public update published on Hive.blog
+• At least 1 audit log or ledger export published
+</textarea>
+          </div>
+        </div>
+        <div class="inputs single">
+          <div>
+            <label>Non-compliance rule</label>
+            <textarea id="noncomp">If the quarterly report is not published within 10 days of term end, no funding extension the following quarter.</textarea>
+          </div>
+        </div>
+
+        <h2 class="section">Return-of-Value to DHF
+          <span class="tooltip" data-tip="Describe how value flows back (revenue share, fee burn, buybacks, or partner contributions)."></span>
+        </h2>
+        <div class="section-hint">Ensure funded projects contribute back to Hive’s ecosystem value.</div>
+        <div class="row">
+          <input id="chkReturn" type="checkbox" checked />
+          <div style="margin-left:10px;width:100%;">
+            <label for="chkReturn">Require return-of-value section in proposals</label>
+            <div class="hint">Prefer explicit % back to DHF or measurable economic sink.</div>
+          </div>
+        </div>
+        <div class="inputs single">
+          <div>
+            <label>Return-of-value statement</label>
+            <textarea id="rov">Project commits to share ≥10% of net profits with the DHF (quarterly), or equivalent buyback/burn mechanics documented in the proposal.</textarea>
+          </div>
+        </div>
+
+        <h2 class="section">Accounting (GAAP / Double-Entry)
+          <span class="tooltip" data-tip="Baseline professionalism: double-entry bookkeeping, receipts, and periodic financials."></span>
+        </h2>
+        <div class="section-hint">Promote accountability through transparent bookkeeping and financial reporting.</div>
+        <div class="row">
+          <input id="chkGAAP" type="checkbox" checked />
+          <div style="margin-left:10px;width:100%;">
+            <label for="chkGAAP">Require GAAP-style double-entry bookkeeping</label>
+            <div class="hint">Projects publish ledger extracts (CSV/JSON), receipts, and reconciled statements.</div>
+          </div>
+        </div>
+        <div class="inputs three">
+          <div>
+            <label>Financial cadence</label>
+            <select id="finCadence">
+              <option>Monthly</option><option selected>Quarterly</option>
+            </select>
+          </div>
+          <div>
+            <label>Public ledger export</label>
+            <select id="ledger"><option selected>Required</option><option>Optional</option></select>
+          </div>
+          <div>
+            <label>Receipt evidence</label>
+            <select id="receipts"><option selected>Required</option><option>Optional</option></select>
+          </div>
+        </div>
+
+        <!-- Review Commitment Section -->
+        <h2 class="section">Review Commitment</h2>
+        <div class="section-hint">Specify when you plan to revisit and update this voting criteria.</div>
+        <div class="row">
+          <input id="chkRevise" type="checkbox" checked />
+          <div style="margin-left:10px;width:100%;">
+            <div class="inline-select">
+              <label for="chkRevise">Revision interval</label>
+              <select id="reviseInterval">
+                <option value="3" selected>3 months</option>
+                <option value="6">6 months</option>
+                <option value="12">12 months</option>
+              </select>
+            </div>
+            <div class="hint" id="reviseHint">I will revise this voting criteria in 3 months, latest <span id="reviseDate"></span>.</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="gen">Generate Markdown</button>
+          <button class="btn sec" id="copy">Copy Output</button>
+          <a id="icalLink" href="#" download="HiveVotingCriteriaReview.ics" class="btn sec" style="display:none;">Add Reminder to Calendar (.ics)</a>
+        </div>
+    
+        <div id="outputContainer" style="display:none;">
+          <label>Output</label>
+          <pre id="out" class="out" aria-live="polite"></pre>
+        </div>
+      </div>
+
+      <!-- RIGHT: Live Market Panel -->
+      <div class="card" style="margin-bottom:18px; padding:18px 18px 18px 18px; border-radius:12px;">
+        <h2 style="display:flex;align-items:center;gap:8px;">Live HIVE Market
+          <span class="tooltip" data-tip="Data from CoinGecko (refreshed every 5 minutes)."></span>
+        </h2>
+        <div id="marketPanel" class="market">
+          <span class="badge">Fetching…</span>
+        </div>
+        <div class="section">
+          <div id="capStatus" class="hint">Waiting for data…</div>
+        </div>
+
+        <h2>Current DHF Activity</h2>
+        <div id="dhfActivity" class="note">Fetching...</div>
+
+       
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Built with ❤️ for the Hive community — HiveForum
+  </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+// --- Begin Main Async App Logic ---
+(async function(){
+  const $ = sel => document.querySelector(sel);
+
+  // Replace literal "\n" with actual line breaks for textarea defaults
+  // document.querySelectorAll('textarea').forEach(el => {
+  //   el.value = el.value.replace(/\\n/g, '\n');
+  // });
+
+  // Elements
+  const panel = $('#marketPanel');
+  const capStatus = $('#capStatus');
+
+  // Live data fetch (CoinGecko)
+  const API = "https://api.coingecko.com/api/v3/coins/hive?x_cg_demo_api_key=CG-U4WAq6KRZomzpA3z9ReuYCSv&tickers=true&market_data=true";
+
+  let market = { price: null, cap: null, chg24: null, last: null };
+  let dhf = { balance:0, dailyHBD:0, quarterlyUSD:0, top:[] };
+
+  async function loadMarket(){
+    try{
+      panel.innerHTML = '<span class="badge">Loading live data…</span>';
+      const res = await fetch(API, {cache:'no-store'});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const j = await res.json();
+      const md = j.market_data || {};
+      market.price = md.current_price?.usd ?? null;
+      market.cap   = j.market_cap?.usd ?? md.market_cap?.usd ?? j.market_cap_usd ?? null;
+      // The blob you pasted includes market_cap at j.market_cap.usd and also MD; try multiple paths:
+      if(!market.cap && md.market_cap && typeof md.market_cap.usd === 'number') market.cap = md.market_cap.usd;
+      if(!market.cap && j.market_cap && typeof j.market_cap.usd === 'number') market.cap = j.market_cap.usd;
+      market.chg24 = md.price_change_percentage_24h ?? null;
+      market.last  = j.last_updated || md.last_updated || new Date().toISOString();
+
+      const nice = (n, d=2) => (n==null?'—':Number(n).toLocaleString(undefined,{maximumFractionDigits:d}));
+      const badge = (txt)=> `<span class="badge">${txt}</span>`;
+      const pct = (p)=> p==null?'—':(p>=0?`<span class="status ok">+${p.toFixed(2)}%</span>`:`<span class="status warn">${p.toFixed(2)}%</span>`);
+
+      panel.innerHTML = [
+        badge(`Price: $${nice(market.price,4)}`),
+        badge(`Market Cap: $${nice(market.cap,0)}`),
+        badge(`24h: ${pct(market.chg24)}`),
+        badge(`Updated: ${new Date(market.last).toLocaleTimeString()}`)
+      ].join(' ');
+      capStatus.style.display = "none";
+    }catch(e){
+      panel.innerHTML = `<span class="badge">Failed to load market data</span>`;
+      capStatus.textContent = 'Could not fetch live data. You can still set rules manually.';
+      console.error(e);
+    }
+  }
+
+  async function loadDHFData(){
+    try{
+      const res = await fetch("https://api.hive.blog", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "database_api.list_proposals",
+          params: {
+            start: [],
+            limit: 100,
+            order: "by_creator",
+            order_direction: "ascending",
+            status: "active"
+          },
+          id: 1
+        })
+      });
+      const j = await res.json();
+      const proposals = j.result?.proposals || [];
+      // Find Return Proposal (proposal_id === 0)
+      const returnProposal = proposals.find(p => p.proposal_id === 0);
+      const returnVotes = Number(returnProposal?.total_votes || 0);
+      // Filter for funded proposals (not hbdstabilizer, total_votes > return proposal)
+      const funded = proposals.filter(p =>
+        p.receiver !== "hbdstabilizer" &&
+        Number(p.total_votes) > returnVotes
+      );
+      let totalDaily = 0;
+      const payers = {};
+      funded.forEach(p=>{
+        const daily = parseFloat(p.daily_pay.amount)/1000;
+        totalDaily += daily;
+        payers[p.creator] = (payers[p.creator]||0)+daily;
+      });
+      const sorted = Object.entries(payers).sort((a,b)=>b[1]-a[1]).slice(0,5);
+      dhf.dailyHBD = totalDaily;
+      dhf.quarterlyUSD = totalDaily*90;
+      dhf.top = sorted;
+      document.getElementById("dhfActivity").innerHTML = `
+        💰 Daily outflow: ${totalDaily.toLocaleString(undefined,{maximumFractionDigits:0})} HBD<br/>
+        📆 Quarterly projection: ${(totalDaily*90).toLocaleString(undefined,{maximumFractionDigits:0})} HBD<br/>
+        🏆 Top receivers:<br/>${sorted.map(([n,v])=>`  • @${n} (${v.toFixed(0)} HBD/day)`).join("<br/>")}
+      `;
+      evaluateDHFSpending();
+      // Remove any leftover 'Fetching DHF status...' text after evaluateDHFSpending
+      // (No explicit setting needed here; evaluateDHFSpending will update the status.)
+      document.getElementById("dhfSummary").style.display = "none";
+    }catch(e){
+      document.getElementById("dhfActivity").textContent = "Failed to fetch DHF data.";
+      console.error(e);
+    }
+  }
+
+  function evaluateDHFSpending(){
+    // Always clear placeholder before computing
+    document.getElementById("dhfStatus").textContent = "";
+    const marketCap = market.cap || 0;
+    const chosen = document.querySelector('input[name="spendCap"]:checked');
+    let capPct = chosen ? parseFloat(chosen.value) : 1.0;
+    if(chosen && chosen.value==="custom"){
+      const c = parseFloat(document.getElementById("customCap").value||0);
+      if(c>0) {
+        capPct = c;
+      } else if(market.cap && dhf.quarterlyUSD) {
+        capPct = (dhf.quarterlyUSD / market.cap * 100);
+        document.getElementById("customCap").value = capPct.toFixed(2);
+      }
+    }
+    const capUSD = (marketCap*capPct)/100;
+    const current = dhf.quarterlyUSD;
+    const pctUsed = current/(marketCap||1)*100;
+    const over = current>capUSD;
+    const color = over?"danger":"success";
+    const txt = over ? "Over target" : "Within target";
+    document.getElementById("dhfStatus").innerHTML =
+      `Quarterly DHF spend: ≈ $${current.toLocaleString(undefined,{maximumFractionDigits:0})} `+
+      `(${pctUsed.toFixed(2)}% of Market Cap) · Cap: ${capPct.toFixed(2)}% `+
+      `(≈ $${capUSD.toLocaleString(undefined,{maximumFractionDigits:0})}) → `+
+      `<span class="${color}">${txt}</span>`;
+    
+  }
+
+  // Preset strict block removed
+
+  // Generate Markdown
+  $('#gen').addEventListener('click', ()=>{
+
+  
+    const container = $('#outputContainer');
+    const isVisible = container.style.display === 'block';
+    container.style.display = isVisible ? 'none' : 'block';
+  
+  
+
+    const name = $('#name').value.trim() || '(your handle)';
+    const ref  = $('#refurl').value.trim();
+    const quarterly = $('#chkQuarterly').checked;
+    const proposalTerm = $('#proposalTerm').value;
+    const rdays = Number($('#reviewDays').value||0);
+    const staged = $('#staged').value;
+    const escrow = $('#escrow').value;
+    const rep = $('#chkReport').checked;
+    const reportCadence = $('#reportCadence').value;
+    const kpis = $('#kpis').value.trim();
+    const nonc = $('#noncomp').value.trim();
+    const rovReq = $('#chkReturn').checked;
+    const rovTxt = $('#rov').value.trim();
+    const gaap = $('#chkGAAP').checked;
+    const finCadence = $('#finCadence').value;
+    const ledger = $('#ledger').value;
+    const receipts = $('#receipts').value;
+    const quarterlyBeforeRenew = $('#chkQuarterlyBeforeRenew').checked;
+
+    const nice = (n)=> n? n.toLocaleString(undefined): '—';
+    const capNow = (market.cap? `$${Number(market.cap).toLocaleString(undefined)}` : 'n/a');
+
+    let md = [];
+    md.push(`# Hive DAO Voting Criteria — ${name}`);
+    if(ref) md.push(`Reference: ${ref}`);
+    md.push('');
+    md.push(`> Generated via **HiveForum DAO Voting Criteria Builder** · Live Market Cap: **${capNow}**`);
+    md.push('');
+
+    // DHF Spending Policy block
+    const capPctChoice = document.querySelector('input[name="spendCap"]:checked');
+    const capPctVal = capPctChoice ? (capPctChoice.value==="custom" ? Number(document.getElementById("customCap").value||0) : Number(capPctChoice.value)) : 1.0;
+    const currentOutflow = dhf.quarterlyUSD || 0;
+    const currentPct = (currentOutflow/(market.cap||1)*100).toFixed(2);
+    md.push("## DHF Spending Policy");
+    md.push(`Preferred spending cap: **${capPctVal}%** of market cap (≈ $${((market.cap||0)*capPctVal/100).toLocaleString()})`);
+    md.push(`Current quarterly outflow: **≈ $${currentOutflow.toLocaleString()} (${currentPct}%)**`);
+    if(currentOutflow > (market.cap*capPctVal/100)){
+      md.push("→ Current DHF spending **exceeds** preferred target. Voting to restrain further outflows.");
+    } else {
+      md.push("→ Current DHF spending **within** preferred thresholds.");
+    }
+    md.push("");
+
+    md.push(`## Proposal Term & Review Window`);
+    if(quarterly) {
+      md.push(`- Max proposal term: **${proposalTerm}**.`);
+    }
+    md.push(`- Minimum **${rdays} days** between proposal submission and voting for community review.`);
+    md.push(`- **Staged payouts**: ${staged}.`);
+    md.push(`- **Escrow / multisig releases**: ${escrow}.`);
+    md.push('');
+
+    md.push(`## Reporting & KPIs`);
+    if(rep) {
+      md.push(`- **${reportCadence} report required** with clear KPI targets and achievements (publish on-chain).`);
+    }
+    if(kpis) md.push(`- Example KPIs:\n${kpis.split('\n').map(l=>`  ${l.trim()?'• '+l.trim():''}`).join('\n')}`);
+    if(nonc) md.push(`- Non-compliance: ${nonc}`);
+    if(quarterlyBeforeRenew) md.push(`- Reports must be issued before renewal consideration.`);
+    md.push('');
+
+    md.push(`## Return-of-Value to DHF`);
+    if(rovReq) md.push(`- Proposals must include a **Return-of-Value** section.`);
+    if(rovTxt) md.push(`- Stated mechanism: ${rovTxt}`);
+    md.push('');
+
+    md.push(`## Accounting (GAAP / Double-Entry)`);
+    if(gaap){
+      md.push(`- Require **double-entry bookkeeping** (GAAP-style).`);
+      md.push(`- Financial cadence: **${finCadence}**.`);
+      md.push(`- Public ledger export: **${ledger}**.`);
+      md.push(`- Receipt evidence: **${receipts}**.`);
+    }else{
+      md.push(`- GAAP and double-entry bookkeeping: **Recommended** (not strictly required in this policy).`);
+    }
+
+    const reviseEnabled = $('#chkRevise').checked;
+    const reviseMonths = $('#reviseInterval').value;
+    const reviseDate = $('#reviseDate').textContent;
+    if (reviseEnabled) {
+      md.push('');
+      md.push(`## Review Commitment`);
+      md.push(`- I will revise this voting criteria in **${reviseMonths} months**, latest **${reviseDate}**.`);
+    }
+
+    $('#out').textContent = md.join('\n');
+    // Scroll to output on mobile
+    $('#out').scrollIntoView({behavior:'smooth',block:'center'});
+  });
+
+  $('#copy').addEventListener('click', async ()=>{
+    const text = $('#out').textContent;
+    if(!text.trim()){ alert('Generate the Markdown first.'); return; }
+    try{
+      await navigator.clipboard.writeText(text);
+      alert('Copied to clipboard!');
+    }catch{
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      alert('Copied to clipboard!');
+    }
+  });
+
+  // Re-evaluate DHF spending cap when radio or custom input changes
+  document.querySelectorAll('input[name="spendCap"]').forEach(el=>{
+    el.addEventListener('change', evaluateDHFSpending);
+    el.addEventListener('input', evaluateDHFSpending);
+  });
+  document.getElementById('customCap').addEventListener('input', evaluateDHFSpending);
+
+  // Kickoff
+  await loadMarket();
+  await loadDHFData();
+  // --- Review Commitment logic ---
+  const reviseSelect = $('#reviseInterval');
+  const reviseDateSpan = $('#reviseDate');
+  const icalLink = $('#icalLink');
+  const reviseCheck = $('#chkRevise');
+  function updateRevisionDate(){
+    const months = parseInt(reviseSelect.value,10);
+    const now = new Date();
+    const future = new Date(now);
+    future.setMonth(future.getMonth() + months);
+    const formatted = future.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+    reviseDateSpan.textContent = formatted;
+    const icalContent =
+`BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:Review Hive DAO Voting Criteria
+DTSTART:${future.toISOString().replace(/[-:]/g,'').split('.')[0]}Z
+DESCRIPTION:Reminder to review and update your Hive DAO voting criteria.
+END:VEVENT
+END:VCALENDAR`;
+    const blob = new Blob([icalContent], {type: 'text/calendar'});
+    icalLink.href = URL.createObjectURL(blob);
+    icalLink.style.display = reviseCheck && reviseCheck.checked ? 'inline-block' : 'none';
+  }
+  reviseSelect.addEventListener('change', updateRevisionDate);
+  if (reviseCheck) {
+    reviseCheck.addEventListener('change', ()=>{
+      icalLink.style.display = reviseCheck.checked ? 'inline-block' : 'none';
+    });
+  }
+  updateRevisionDate();
+  // Refresh every 5 min
+  setInterval(async () => {
+    await loadMarket();
+    await loadDHFData();
+  }, 5*60*1000);
+// --- End Main Async App Logic ---
+})();
+
+// Auto-select textarea content on click (runs after DOM is loaded)
+document.querySelectorAll('textarea').forEach(el => {
+  el.addEventListener('click', function() {
+    this.select();
+  });
+});
+
+
+
+});
+
+
+</script>
+</body>
+</html>
