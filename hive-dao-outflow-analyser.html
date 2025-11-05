@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hive DAO Outflow Analyzer</title>
+<style>
+:root{
+  --hive-red:#E31337;
+  --hive-red-2:#f63a55;
+  --ink:#111318;
+  --muted:#667085;
+  --bg:#f7f8fb;
+  --card:#fff;
+  --ok:#0f8b4c;
+  --warn:#c23b22;
+  --border:#E5E7EB;
+  --radius:12px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:linear-gradient(180deg,#fafbfd 0%,#fff 100%);
+  color:var(--ink);
+  font:15px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
+}
+.topbar{
+  position:sticky;top:0;
+  background:linear-gradient(90deg,var(--hive-red),var(--hive-red-2));
+  color:#fff;padding:14px 0;
+  box-shadow:0 6px 16px rgba(227,19,55,.18);
+  text-align:center;font-weight:800;letter-spacing:.2px
+}
+.wrap{max-width:960px;margin:0 auto;padding:0 18px}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:0 2px 10px rgba(17,19,24,.05);
+  padding:18px;margin:18px 0
+}
+h2{margin:0 0 8px;font-size:22px;font-weight:800;color:var(--hive-red)}
+.badge{padding:6px 10px;border-radius:999px;font-size:12.5px;border:1px solid var(--border);background:#fff;margin:2px;display:inline-block}
+.status.ok{color:var(--ok);font-weight:700}
+.status.warn{color:var(--warn);font-weight:700}
+.hint{font-size:13px;color:var(--muted)}
+input,select{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--hive-red)}
+.sliderRow{display:flex;align-items:center;gap:12px;margin:8px 0}
+input[type=range]{flex:1;height:6px;-webkit-appearance:none;background:#ddd;border-radius:3px;outline:none}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--hive-red);cursor:pointer;
+  border:2px solid #fff;box-shadow:0 0 4px rgba(0,0,0,.2)
+}
+.progressOuter{
+  width:100%;height:18px;border-radius:999px;background:#eee;margin-top:8px;overflow:hidden
+}
+.progressInner{
+  height:100%;border-radius:999px;
+  background:linear-gradient(90deg,var(--hive-red),var(--hive-red-2));
+  width:0;transition:width .4s ease
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 13.5px;
+}
+th, td {
+  padding: 6px 8px;
+  text-align: left;
+}
+th {
+  border-bottom: 2px solid var(--border);
+  color: var(--muted);
+  font-weight: 700;
+}
+tr:nth-child(even) {
+  background: #fafafa;
+}
+tr.you {
+  font-weight: 700;
+  background: #fff6f8;
+  transition: background 0.2s ease;
+}
+tr.you:hover {
+  background: #ffecef;
+  color: var(--hive-red);
+}
+tr.you td {
+  border-top: 1px solid var(--hive-red);
+  border-bottom: 1px solid var(--hive-red);
+}
+
+footer{padding:22px 0 30px;text-align:center;color:var(--muted);font-size:13px}
+.btn{
+  background:linear-gradient(90deg,var(--hive-red),var(--hive-red-2));
+  color:#fff;border:0;border-radius:999px;padding:10px 14px;
+  font-weight:700;cursor:pointer;font-size:14px;
+  box-shadow:0 6px 18px rgba(227,19,55,.25)
+}
+</style>
+</head>
+<body>
+<div class="topbar">Hive DAO Outflow Analyzer</div>
+<div class="wrap">
+
+<div class="card" id="marketCard">
+  <h2>Live Market Overview</h2>
+  <div id="marketStats" class="hint">Fetching data...</div>
+</div>
+
+<div class="card" id="dhfCard">
+  <h2>Current DHF Outflows</h2>
+  <div id="dhfStats" class="hint">Fetching proposals...</div>
+  <div class="progressOuter"><div class="progressInner" id="bar"></div></div>
+</div>
+
+<div class="card">
+  <h2>Your Spending Cap</h2>
+  <div class="sliderRow">
+    <label for="capRange">Preferred Cap:</label>
+    <input id="capRange" type="range" min="0.1" max="10" step="0.1" value="0.5">
+    <span id="capValue">0.5%</span>
+  </div>
+  <div class="sliderRow">
+    <label>Proposed Daily Budget:</label>
+    <input id="budget" type="number" min="0" step="10" value="0" style="width:120px">
+    <span class="hint">HBD / day</span>
+  </div>
+  <button class="btn" id="recalc">Recalculate</button>
+  <div id="capResult" class="hint" style="margin-top:10px"></div>
+</div>
+
+<div class="card">
+  <h2>Top Active Proposals</h2>
+  <table id="propTable">
+    <thead><tr><th>#</th><th>Creator</th><th>Receiver</th><th>Daily HBD</th><th>% of Total</th><th>Title</th></tr></thead>
+    <tbody><tr><td colspan="6" class="hint">Loading...</td></tr></tbody>
+  </table>
+</div>
+
+</div>
+<footer>Built with ❤️ for the Hive community — HiveForum Tools</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+  const fmt=(n,d=2)=>Number(n).toLocaleString(undefined,{maximumFractionDigits:d});
+  const marketStats=document.getElementById('marketStats');
+  const dhfStats=document.getElementById('dhfStats');
+  const bar=document.getElementById('bar');
+  const tableBody=document.querySelector('#propTable tbody');
+  const capRange=document.getElementById('capRange');
+  const capValue=document.getElementById('capValue');
+  const budget=document.getElementById('budget');
+  const capResult=document.getElementById('capResult');
+  const recalc=document.getElementById('recalc');
+  let marketCap=0, price=0, dhfDaily=0, dhfAnnual=0, proposals=[], userProposal=null;
+
+  async function loadMarket(){
+    try{
+      const r=await fetch('https://api.coingecko.com/api/v3/coins/hive?x_cg_demo_api_key=CG-U4WAq6KRZomzpA3z9ReuYCSv&market_data=true');
+      const j=await r.json();
+      price=j.market_data.current_price.usd;
+      marketCap=j.market_data.market_cap.usd;
+      const ch=j.market_data.price_change_percentage_24h;
+      marketStats.innerHTML=
+        `<span class="badge">Price $${fmt(price,4)}</span>
+         <span class="badge">Cap $${fmt(marketCap,0)}</span>
+         <span class="badge">24 h ${ch>=0?'<span class="status ok">+'+ch.toFixed(2)+'%</span>':'<span class="status warn">'+ch.toFixed(2)+'%</span>'}</span>
+         <span class="badge">Updated ${new Date().toLocaleTimeString()}</span>`;
+    }catch(e){marketStats.textContent='Failed to fetch market data';}
+  }
+
+  async function loadDHF() {
+    try {
+      const res = await fetch('https://api.hive.blog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'database_api.list_proposals',
+          params: { start: [], limit: 500, order: 'by_creator', status: 'active' },
+          id: 1
+        })
+      });
+      const j = await res.json();
+      const all = j.result?.proposals || [];
+
+      // find return proposal (id == 0)
+      const returnProposal = all.find(p => p.proposal_id === 0);
+      const returnVotes = Number(returnProposal?.total_votes || 0);
+
+      // filter: funded proposals only (votes > returnProposal) and exclude hbdstabilizer
+      proposals = all.filter(p =>
+        p.proposal_id !== 0 &&
+        p.receiver !== 'hbdstabilizer' &&
+        Number(p.total_votes) > returnVotes
+      );
+
+      dhfDaily = proposals.reduce((s, p) => s + parseFloat(p.daily_pay.amount) / 1000, 0);
+      dhfAnnual = dhfDaily * 365;
+
+      updateTable();
+      updateStats();
+    } catch (e) {
+      dhfStats.textContent = 'Failed to fetch DHF data.';
+      console.error(e);
+    }
+  }
+
+function updateTable() {
+  let display = [...proposals];
+  if (userProposal) display.push(userProposal);
+  display.sort((a, b) => parseFloat(b.daily_pay.amount) - parseFloat(a.daily_pay.amount));
+  const totalDaily = display.reduce((s,p)=>s+parseFloat(p.daily_pay.amount)/1000,0);
+  const rows = display.slice(0,20).map((p,i)=>{
+    const daily=parseFloat(p.daily_pay.amount)/1000;
+    const pct=(daily/totalDaily*100).toFixed(1);
+    const isUser = p.isUser ? ' (you)' : '';
+    const trClass = p.isUser ? ' class="you"' : '';
+    return `<tr${trClass}>
+      <td>${i+1}</td>
+      <td>@${p.creator}${isUser}</td>
+      <td>@${p.receiver}${isUser}</td>
+      <td>${fmt(daily,0)}</td>
+      <td>${pct}%</td>
+      <td>${p.subject || (p.isUser?'Your proposed project':'')}</td>
+    </tr>`;
+  }).join('');
+  tableBody.innerHTML = rows || '<tr><td colspan="6" class="hint">No data</td></tr>';
+}
+
+  function updateStats(){
+    const cap=parseFloat(capRange.value);
+    const capUSD=marketCap*cap/100;
+    const proposedDaily=parseFloat(budget.value||0);
+    const proposedAnnual=proposedDaily*365;
+    dhfDaily = proposals.reduce((s,p)=>s+parseFloat(p.daily_pay.amount)/1000,0);
+    dhfAnnual = dhfDaily*365;
+
+    const totalAnnual = dhfAnnual + proposedAnnual;
+    const pctUsed = dhfAnnual/marketCap*100;
+    const newPct = totalAnnual/marketCap*100;
+    const within = newPct <= cap;
+    bar.style.width = Math.min(pctUsed/cap*100,100)+'%';
+    dhfStats.innerHTML =
+      `💰 Daily ≈ ${fmt(dhfDaily,0)} HBD | 📆 Annual ≈ ${fmt(dhfAnnual,0)} USD | `+
+      `Funded Proposals: ${proposals.length}`;
+    capResult.innerHTML =
+      `Annual spend = <b>${fmt(dhfAnnual,0)} USD</b> (${pctUsed.toFixed(2)} %)<br>`+
+      `Preferred cap <b>${cap.toFixed(1)} % = $${fmt(capUSD,0)}</b><br>`+
+      `Your proposal adds <b>${(proposedAnnual/marketCap*100).toFixed(3)} %</b> → `+
+      `New total <b>${newPct.toFixed(2)} %</b> → `+
+      (within?`<span class="status ok">✅ within target</span>`:`<span class="status warn">⚠️ over target</span>`);
+  }
+
+  recalc.addEventListener('click',()=>{
+    const daily=parseFloat(budget.value||0);
+    if(daily>0){
+      userProposal={
+        isUser:true,
+        creator:'you',
+        receiver:'you',
+        daily_pay:{amount:String(daily*1000)}, // mimic HBD internal precision
+        subject:'Your proposed project'
+      };
+    } else userProposal=null;
+    updateTable();
+    updateStats();
+  });
+
+  capRange.addEventListener('input',()=>{
+    capValue.textContent=capRange.value+'%';
+    updateStats();
+  });
+  budget.addEventListener('input',updateStats);
+
+  loadMarket().then(loadDHF);
+  setInterval(()=>{loadMarket();loadDHF();},5*60*1000);
+});
+</script>
+</body>
+</html>
