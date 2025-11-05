@@ -393,6 +393,37 @@ input[type="number"]::-webkit-inner-spin-button {
     background: var(--hive-red);
     color: #fff;
   }
+
+  .check-box-spacer-w100 {
+    margin-left:10px;
+    width: 100%;
+  }
+
+  .rating {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 2px;
+    margin-top: 6px;
+    align-items: center;
+  }
+
+  .rating input {
+    display: none;
+  }
+
+  .rating label {
+    font-size: 20px;
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .rating label:hover,
+  .rating label:hover ~ label,
+  .rating input:checked ~ label {
+    color: var(--hive-red);
+  }
 </style>
   
 </head>
@@ -428,6 +459,91 @@ input[type="number"]::-webkit-inner-spin-button {
           </div>
         </div>
 
+        <h2 class="section">Preferred Project Focus</h2>
+<div class="section-hint">Highlight which kinds of projects you prioritize for DHF funding.</div>
+<div id="focusList">
+  <div class="row"><input type="checkbox" class="focusChk" data-key="growth" /><div class="check-box-spacer-w100"><label>User Growth & Retention</label><div class="hint">Focus on onboarding, education, and retention metrics.</div><div class="rating" data-key="growth">
+    <input type="radio" id="growth5" name="growth" value="5"><label for="growth5">★</label>
+    <input type="radio" id="growth4" name="growth" value="4"><label for="growth4">★</label>
+    <input type="radio" id="growth3" name="growth" value="3"><label for="growth3">★</label>
+    <input type="radio" id="growth2" name="growth" value="2"><label for="growth2">★</label>
+    <input type="radio" id="growth1" name="growth" value="1"><label for="growth1">★</label>
+  </div></div></div>
+
+  <div class="row"><input type="checkbox" class="focusChk" data-key="dev" /><div class="check-box-spacer-w100"><label>Developer Ecosystem</label><div class="hint">SDKs, APIs, libraries, open-source tools, dev education.</div><div class="rating" data-key="dev">
+    <input type="radio" id="dev5" name="dev" value="5"><label for="dev5">★</label>
+    <input type="radio" id="dev4" name="dev" value="4"><label for="dev4">★</label>
+    <input type="radio" id="dev3" name="dev" value="3"><label for="dev3">★</label>
+    <input type="radio" id="dev2" name="dev" value="2"><label for="dev2">★</label>
+    <input type="radio" id="dev1" name="dev" value="1"><label for="dev1">★</label>
+  </div></div></div>
+
+  <div class="row"><input type="checkbox" class="focusChk" data-key="marketing" /><div class="check-box-spacer-w100"><label>Marketing & Awareness</label><div class="hint">Outreach, campaigns, events, collaborations.</div><div class="rating" data-key="marketing">
+    <input type="radio" id="marketing5" name="marketing" value="5"><label for="marketing5">★</label>
+    <input type="radio" id="marketing4" name="marketing" value="4"><label for="marketing4">★</label>
+    <input type="radio" id="marketing3" name="marketing" value="3"><label for="marketing3">★</label>
+    <input type="radio" id="marketing2" name="marketing" value="2"><label for="marketing2">★</label>
+    <input type="radio" id="marketing1" name="marketing" value="1"><label for="marketing1">★</label>
+  </div></div></div>
+
+  <div class="row"><input type="checkbox" class="focusChk" data-key="infra" /><div class="check-box-spacer-w100"><label>Infrastructure & Core Tech</label><div class="hint">Core dev, performance, scalability, reliability.</div><div class="rating" data-key="infra">
+    <input type="radio" id="infra5" name="infra" value="5"><label for="infra5">★</label>
+    <input type="radio" id="infra4" name="infra" value="4"><label for="infra4">★</label>
+    <input type="radio" id="infra3" name="infra" value="3"><label for="infra3">★</label>
+    <input type="radio" id="infra2" name="infra" value="2"><label for="infra2">★</label>
+    <input type="radio" id="infra1" name="infra" value="1"><label for="infra1">★</label>
+  </div></div></div>
+
+  <div class="row"><input type="checkbox" class="focusChk" data-key="innovation" /><div class="check-box-spacer-w100"><label>dApp Innovation</label><div class="hint">New use cases leveraging Hive’s unique strengths.</div><div class="rating" data-key="innovation">
+    <input type="radio" id="innovation5" name="innovation" value="5"><label for="innovation5">★</label>
+    <input type="radio" id="innovation4" name="innovation" value="4"><label for="innovation4">★</label>
+    <input type="radio" id="innovation3" name="innovation" value="3"><label for="innovation3">★</label>
+    <input type="radio" id="innovation2" name="innovation" value="2"><label for="innovation2">★</label>
+    <input type="radio" id="innovation1" name="innovation" value="1"><label for="innovation1">★</label>
+  </div></div></div>
+
+  <div class="row"><input type="checkbox" class="focusChk" data-key="interop" /><div class="check-box-spacer-w100"><label>Interoperability & Cross-Chain</label><div class="hint">Connect Hive to other ecosystems.</div><div class="rating" data-key="interop">
+    <input type="radio" id="interop5" name="interop" value="5"><label for="interop5">★</label>
+    <input type="radio" id="interop4" name="interop" value="4"><label for="interop4">★</label>
+    <input type="radio" id="interop3" name="interop" value="3"><label for="interop3">★</label>
+    <input type="radio" id="interop2" name="interop" value="2"><label for="interop2">★</label>
+    <input type="radio" id="interop1" name="interop" value="1"><label for="interop1">★</label>
+  </div></div></div>
+
+  <div class="row"><input type="checkbox" class="focusChk" data-key="defi" /><div class="check-box-spacer-w100"><label>Financial Tools & DeFi</label><div class="hint">Stable systems, swaps, wrapped assets, lending.</div><div class="rating" data-key="defi">
+    <input type="radio" id="defi5" name="defi" value="5"><label for="defi5">★</label>
+    <input type="radio" id="defi4" name="defi" value="4"><label for="defi4">★</label>
+    <input type="radio" id="defi3" name="defi" value="3"><label for="defi3">★</label>
+    <input type="radio" id="defi2" name="defi" value="2"><label for="defi2">★</label>
+    <input type="radio" id="defi1" name="defi" value="1"><label for="defi1">★</label>
+  </div></div></div>
+
+  <div class="row"><input type="checkbox" class="focusChk" data-key="content" /><div class="check-box-spacer-w100"><label>Content & Media</label><div class="hint">Storytelling, tutorials, Hive community showcases.</div><div class="rating" data-key="content">
+    <input type="radio" id="content5" name="content" value="5"><label for="content5">★</label>
+    <input type="radio" id="content4" name="content" value="4"><label for="content4">★</label>
+    <input type="radio" id="content3" name="content" value="3"><label for="content3">★</label>
+    <input type="radio" id="content2" name="content" value="2"><label for="content2">★</label>
+    <input type="radio" id="content1" name="content" value="1"><label for="content1">★</label>
+  </div></div></div>
+
+  <div class="row"><input type="checkbox" class="focusChk" data-key="governance" /><div class="check-box-spacer-w100"><label>Governance & Coordination</label><div class="hint">DAO tools, transparency, accountability.</div><div class="rating" data-key="governance">
+    <input type="radio" id="governance5" name="governance" value="5"><label for="governance5">★</label>
+    <input type="radio" id="governance4" name="governance" value="4"><label for="governance4">★</label>
+    <input type="radio" id="governance3" name="governance" value="3"><label for="governance3">★</label>
+    <input type="radio" id="governance2" name="governance" value="2"><label for="governance2">★</label>
+    <input type="radio" id="governance1" name="governance" value="1"><label for="governance1">★</label>
+  </div></div></div>
+
+  <div class="row"><input type="checkbox" class="focusChk" data-key="sustainability" /><div class="check-box-spacer-w100"><label>Sustainability & ROI for DHF</label><div class="hint">Projects generating measurable returns or DHF paybacks.</div><div class="rating" data-key="sustainability">
+    <input type="radio" id="sustainability5" name="sustainability" value="5"><label for="sustainability5">★</label>
+    <input type="radio" id="sustainability4" name="sustainability" value="4"><label for="sustainability4">★</label>
+    <input type="radio" id="sustainability3" name="sustainability" value="3"><label for="sustainability3">★</label>
+    <input type="radio" id="sustainability2" name="sustainability" value="2"><label for="sustainability2">★</label>
+    <input type="radio" id="sustainability1" name="sustainability" value="1"><label for="sustainability1">★</label>
+  </div></div></div>
+
+  <div class="inputs single"><div><label>Other (custom)</label><input id="focusOther" type="text" placeholder="Describe other focus area(s)" /></div></div>
+</div>
 
         <h2 class="section">DHF Spending Benchmarks</h2>
         <div class="section-hint">Define responsible funding thresholds relative to Hive’s market cap.</div>
@@ -453,7 +569,7 @@ input[type="number"]::-webkit-inner-spin-button {
         <div class="section-hint">Encourage shorter proposal terms and allow time for community feedback.</div>
         <div class="row">
           <input id="chkQuarterly" type="checkbox" checked />
-          <div style="margin-left:10px;width:100%;">
+          <div class="check-box-spacer-w100">
             <div class="inline-select">
               <label for="chkQuarterly">Max proposal term</label>
               <select id="proposalTerm">
@@ -486,7 +602,7 @@ input[type="number"]::-webkit-inner-spin-button {
         <div class="section-hint">Set measurable targets and require transparent progress reporting.</div>
         <div class="row">
           <input id="chkReport" type="checkbox" checked />
-          <div style="margin-left:10px;width:100%;">
+          <div class="check-box-spacer-w100">
             <div class="inline-select">
               <label for="chkReport">Reporting cadence</label>
               <select id="reportCadence">
@@ -500,7 +616,7 @@ input[type="number"]::-webkit-inner-spin-button {
         </div>
         <div class="row">
           <input id="chkQuarterlyBeforeRenew" type="checkbox" checked />
-          <div style="margin-left:10px;width:100%;">
+          <div class="check-box-spacer-w100">
             <label for="chkQuarterlyBeforeRenew">Reports must be issued before renewal consideration</label>
           </div>
         </div>
@@ -529,7 +645,7 @@ input[type="number"]::-webkit-inner-spin-button {
         <div class="section-hint">Ensure funded projects contribute back to Hive’s ecosystem value.</div>
         <div class="row">
           <input id="chkReturn" type="checkbox" checked />
-          <div style="margin-left:10px;width:100%;">
+          <div class="check-box-spacer-w100">
             <label for="chkReturn">Require return-of-value section in proposals</label>
             <div class="hint">Prefer explicit % back to DHF or measurable economic sink.</div>
           </div>
@@ -547,7 +663,7 @@ input[type="number"]::-webkit-inner-spin-button {
         <div class="section-hint">Promote accountability through transparent bookkeeping and financial reporting.</div>
         <div class="row">
           <input id="chkGAAP" type="checkbox" checked />
-          <div style="margin-left:10px;width:100%;">
+          <div class="check-box-spacer-w100">
             <label for="chkGAAP">Require GAAP-style double-entry bookkeeping</label>
             <div class="hint">Projects publish ledger extracts (CSV/JSON), receipts, and reconciled statements.</div>
           </div>
@@ -574,7 +690,7 @@ input[type="number"]::-webkit-inner-spin-button {
         <div class="section-hint">Specify when you plan to revisit and update this voting criteria.</div>
         <div class="row">
           <input id="chkRevise" type="checkbox" checked />
-          <div style="margin-left:10px;width:100%;">
+          <div class="check-box-spacer-w100">
             <div class="inline-select">
               <label for="chkRevise">Revision interval</label>
               <select id="reviseInterval">
@@ -801,6 +917,30 @@ document.addEventListener('DOMContentLoaded', function() {
     md.push(`> Generated via **HiveForum DAO Voting Criteria Builder** · Live Market Cap: **${capNow}**`);
     md.push('');
 
+    // Project Focus Block
+    const focusItems = Array.from(document.querySelectorAll('#focusList .focusChk'));
+    let focusLines = [];
+    focusItems.forEach(chk=>{
+      if(chk.checked){
+        const key = chk.dataset.key;
+        const rating = document.querySelector(`.rating[data-key="${key}"] input:checked`)?.value;
+        const label = chk.parentElement.querySelector('label').textContent.trim();
+        if(rating){
+          focusLines.push(`${'★'.repeat(rating)}${'☆'.repeat(5-rating)} - ${label} (Priority: ${rating}/5)`);
+        } else {
+          focusLines.push(`- ${label}`);
+        }
+      }
+    });
+    const focusOther = $('#focusOther').value.trim();
+    if(focusOther) focusLines.push(`- Other: ${focusOther}`);
+
+    if(focusLines.length){
+      md.push("## Preferred Project Focus");
+      focusLines.forEach(l=>md.push(l));
+      md.push("");
+    }
+
     // DHF Spending Policy block
     const capPctChoice = document.querySelector('input[name="spendCap"]:checked');
     const capPctVal = capPctChoice ? (capPctChoice.value==="custom" ? Number(document.getElementById("customCap").value||0) : Number(capPctChoice.value)) : 1.0;
@@ -935,7 +1075,22 @@ document.querySelectorAll('textarea').forEach(el => {
   });
 });
 
-
+// logic for project focus rating 
+document.querySelectorAll('#focusList .row').forEach(row => {
+    const chk = row.querySelector('.focusChk');
+    // Use .rating instead of .priority
+    const radios = row.querySelectorAll('.rating input[type="radio"]');
+    radios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        chk.checked = true;
+      });
+    });
+    chk.addEventListener('change', () => {
+      if (!chk.checked) {
+        radios.forEach(r => r.checked = false);
+      }
+    });
+  });
 
 });
 
