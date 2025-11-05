@@ -232,29 +232,44 @@ function updateTable() {
   tableBody.innerHTML = rows || '<tr><td colspan="6" class="hint">No data</td></tr>';
 }
 
-  function updateStats(){
-    const cap=parseFloat(capRange.value);
-    const capUSD=marketCap*cap/100;
-    const proposedDaily=parseFloat(budget.value||0);
-    const proposedAnnual=proposedDaily*365;
-    dhfDaily = proposals.reduce((s,p)=>s+parseFloat(p.daily_pay.amount)/1000,0);
-    dhfAnnual = dhfDaily*365;
+ function updateStats(){
+  const cap = parseFloat(capRange.value);
+  const capUSD = marketCap * cap / 100;
+  const proposedDaily = parseFloat(budget.value || 0);
+  const proposedAnnual = proposedDaily * 365;
 
-    const totalAnnual = dhfAnnual + proposedAnnual;
-    const pctUsed = dhfAnnual/marketCap*100;
-    const newPct = totalAnnual/marketCap*100;
-    const within = newPct <= cap;
-    bar.style.width = Math.min(pctUsed/cap*100,100)+'%';
-    dhfStats.innerHTML =
-      `💰 Daily ≈ ${fmt(dhfDaily,0)} HBD | 📆 Annual ≈ ${fmt(dhfAnnual,0)} USD | `+
-      `Funded Proposals: ${proposals.length}`;
-    capResult.innerHTML =
-      `Annual spend = <b>${fmt(dhfAnnual,0)} USD</b> (${pctUsed.toFixed(2)} %)<br>`+
-      `Preferred cap <b>${cap.toFixed(1)} % = $${fmt(capUSD,0)}</b><br>`+
-      `Your proposal adds <b>${(proposedAnnual/marketCap*100).toFixed(3)} %</b> → `+
-      `New total <b>${newPct.toFixed(2)} %</b> → `+
-      (within?`<span class="status ok">✅ within target</span>`:`<span class="status warn">⚠️ over target</span>`);
-  }
+  // current totals
+  const currentDaily = proposals.reduce((s,p)=>s+parseFloat(p.daily_pay.amount)/1000,0);
+  const currentAnnual = currentDaily * 365;
+  const totalAnnual = currentAnnual + proposedAnnual;
+
+  const pctUsed = currentAnnual / marketCap * 100;
+  const newPct = totalAnnual / marketCap * 100;
+  const within = newPct <= cap;
+
+  // update the progress bar relative to CAP — show overage if any
+  const pctOfCap = (newPct / cap) * 100;
+  bar.style.width = Math.min(pctOfCap, 100) + '%';
+  bar.style.background = within
+    ? 'linear-gradient(90deg,var(--hive-red),var(--hive-red-2))'
+    : 'linear-gradient(90deg,#c23b22,#ff6666)';
+
+  dhfStats.innerHTML =
+    `💰 Daily ≈ ${fmt(currentDaily,0)} HBD | 📆 Annual ≈ ${fmt(currentAnnual,0)} USD | ` +
+    `Funded Proposals: ${proposals.length}` +
+    (userProposal ? ` + <b>Your project</b>` : '');
+
+  capResult.innerHTML =
+    `Annual spend = <b>${fmt(currentAnnual,0)} USD</b> (${pctUsed.toFixed(2)} %)<br>` +
+    `Preferred cap <b>${cap.toFixed(1)} % = $${fmt(capUSD,0)}</b><br>` +
+    (userProposal
+      ? `Your proposal adds <b>${(proposedAnnual/marketCap*100).toFixed(3)} %</b> → `
+      : '') +
+    `New total <b>${newPct.toFixed(2)} %</b> → ` +
+    (within
+      ? `<span class="status ok">✅ within target</span>`
+      : `<span class="status warn">⚠️ over target</span>`);
+}
 
   recalc.addEventListener('click',()=>{
     const daily=parseFloat(budget.value||0);
