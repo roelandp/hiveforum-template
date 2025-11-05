@@ -232,38 +232,40 @@ function updateTable() {
   tableBody.innerHTML = rows || '<tr><td colspan="6" class="hint">No data</td></tr>';
 }
 
- function updateStats(){
+function updateStats() {
   const cap = parseFloat(capRange.value);
   const capUSD = marketCap * cap / 100;
   const proposedDaily = parseFloat(budget.value || 0);
   const proposedAnnual = proposedDaily * 365;
 
-  // current totals
+  // current totals (exclude hbdstabilizer, already filtered)
   const currentDaily = proposals.reduce((s,p)=>s+parseFloat(p.daily_pay.amount)/1000,0);
   const currentAnnual = currentDaily * 365;
   const totalAnnual = currentAnnual + proposedAnnual;
 
-  const pctUsed = currentAnnual / marketCap * 100;
+  const pctUsed = (currentAnnual / marketCap * 100);
   const newPct = totalAnnual / marketCap * 100;
   const within = newPct <= cap;
 
-  // update the progress bar relative to CAP — show overage if any
+  // update progress bar relative to CAP — show overage if any
   const pctOfCap = (newPct / cap) * 100;
   bar.style.width = Math.min(pctOfCap, 100) + '%';
   bar.style.background = within
     ? 'linear-gradient(90deg,var(--hive-red),var(--hive-red-2))'
     : 'linear-gradient(90deg,#c23b22,#ff6666)';
 
+  // update header stats line
   dhfStats.innerHTML =
-    `💰 Daily ≈ ${fmt(currentDaily,0)} HBD | 📆 Annual ≈ ${fmt(currentAnnual,0)} USD | ` +
-    `Funded Proposals: ${proposals.length}` +
-    (userProposal ? ` + <b>Your project</b>` : '');
+    `💰 Daily ≈ ${fmt(currentDaily,0)} HBD | 📆 Annual ≈ ${fmt(currentAnnual,0)} USD ` +
+    `(<b>${pctUsed.toFixed(2)} % of Hive market cap</b>) | Funded Proposals: ${proposals.length}` +
+    (userProposal ? ` + <b>Your Project</b>` : '');
 
+  // detailed cap comparison
   capResult.innerHTML =
     `Annual spend = <b>${fmt(currentAnnual,0)} USD</b> (${pctUsed.toFixed(2)} %)<br>` +
     `Preferred cap <b>${cap.toFixed(1)} % = $${fmt(capUSD,0)}</b><br>` +
     (userProposal
-      ? `Your proposal adds <b>${(proposedAnnual/marketCap*100).toFixed(3)} %</b> → `
+      ? `Your proposal adds <b>${(proposedAnnual / marketCap * 100).toFixed(3)} %</b> → `
       : '') +
     `New total <b>${newPct.toFixed(2)} %</b> → ` +
     (within
